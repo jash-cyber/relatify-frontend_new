@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Heart, Shield, Brain, MessageCircle, Zap, Check } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
+import html2canvas from 'html2canvas';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
@@ -56,13 +57,9 @@ function FloatingCardStack() {
           <p className="text-xs text-gray-400">Abstract connection</p>
         </div>
       </div>
-
       <div className="relative w-full h-full animate-float">
         <div className="absolute inset-0 animate-fadeIn" style={{ animationDelay: '0ms' }}>
-          <div
-            className="absolute w-56 bg-white rounded-2xl shadow-lg border border-pink-200 p-4 transform transition-transform hover:shadow-xl"
-            style={{ rotate: '-2deg', top: '0px', left: '20px' }}
-          >
+          <div className="absolute w-56 bg-white rounded-2xl shadow-lg border border-pink-200 p-4 transform transition-transform hover:shadow-xl" style={{ rotate: '-2deg', top: '0px', left: '20px' }}>
             <h3 className="text-xs font-bold text-gray-900 mb-3">Emotional Snapshot</h3>
             <div className="space-y-2">
               <div>
@@ -86,12 +83,8 @@ function FloatingCardStack() {
             </div>
           </div>
         </div>
-
         <div className="absolute inset-0 animate-fadeIn" style={{ animationDelay: '100ms' }}>
-          <div
-            className="absolute w-56 bg-white rounded-2xl shadow-lg border border-emerald-200 p-4 transform transition-transform hover:shadow-xl"
-            style={{ rotate: '1deg', top: '80px', left: '40px' }}
-          >
+          <div className="absolute w-56 bg-white rounded-2xl shadow-lg border border-emerald-200 p-4 transform transition-transform hover:shadow-xl" style={{ rotate: '1deg', top: '80px', left: '40px' }}>
             <h3 className="text-xs font-bold text-gray-900 mb-3 flex items-center gap-2">
               <span className="text-green-500">✓</span> Green Flags
             </h3>
@@ -102,12 +95,8 @@ function FloatingCardStack() {
             </ul>
           </div>
         </div>
-
         <div className="absolute inset-0 animate-fadeIn" style={{ animationDelay: '200ms' }}>
-          <div
-            className="absolute w-56 bg-white rounded-2xl shadow-lg border border-rose-200 p-4 transform transition-transform hover:shadow-xl"
-            style={{ rotate: '-1.5deg', top: '160px', left: '60px' }}
-          >
+          <div className="absolute w-56 bg-white rounded-2xl shadow-lg border border-rose-200 p-4 transform transition-transform hover:shadow-xl" style={{ rotate: '-1.5deg', top: '160px', left: '60px' }}>
             <h3 className="text-xs font-bold text-gray-900 mb-3 flex items-center gap-2">
               <span className="text-rose-500">!</span> Red Flags
             </h3>
@@ -118,7 +107,6 @@ function FloatingCardStack() {
           </div>
         </div>
       </div>
-
       <div className="absolute -top-20 -right-16 w-40 h-40 bg-gradient-to-br from-pink-200 to-purple-200 rounded-full opacity-20 blur-3xl"></div>
       <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-gradient-to-br from-purple-200 to-pink-200 rounded-full opacity-20 blur-3xl"></div>
     </div>
@@ -129,6 +117,95 @@ function BackgroundBlob({ className }: { className: string }) {
   return <div className={`absolute rounded-full opacity-15 blur-3xl ${className}`}></div>;
 }
 
+// ── Share Card (renders off-screen, captured by html2canvas) ──────────────────
+function ShareCard({ analysis, shareRef }: { analysis: AnalysisResult; shareRef: React.RefObject<HTMLDivElement> }) {
+  const snap = analysis.snapshot;
+  const bars = [
+    { label: 'Emotional Maturity',  value: snap.emotional_maturity,  color: '#e040a0' },
+    { label: 'Stability',           value: snap.stability,           color: '#9040e0' },
+    { label: 'Ghosting Risk',       value: snap.ghosting_risk,       color: '#e04040' },
+    { label: 'Emotional Intensity', value: snap.emotional_intensity, color: '#d08020' },
+    { label: 'Relationship Safety', value: snap.relationship_safety, color: '#20a060' },
+  ];
+
+  return (
+    <div
+      ref={shareRef}
+      style={{
+        width: '520px',
+        background: '#141416',
+        borderRadius: '24px',
+        overflow: 'hidden',
+        border: '1px solid rgba(255,255,255,0.07)',
+        fontFamily: 'Georgia, serif',
+        position: 'absolute',
+        left: '-9999px',
+        top: 0,
+      }}
+    >
+      {/* Header */}
+      <div style={{ padding: '28px 32px 22px', background: 'linear-gradient(135deg, #1a0a2e 0%, #16091f 50%, #0d1a2e 100%)' }}>
+        <div style={{ fontSize: '11px', letterSpacing: '3px', color: 'rgba(255,255,255,0.35)', marginBottom: '14px', fontFamily: 'sans-serif', textTransform: 'uppercase' }}>
+          Relatify · Profile Analysis
+        </div>
+        {snap.one_line_reality_check && (
+          <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, borderLeft: '2px solid rgba(220,80,180,0.5)', paddingLeft: '12px', marginBottom: '0px', fontStyle: 'italic' }}>
+            "{snap.one_line_reality_check}"
+          </div>
+        )}
+      </div>
+
+      {/* Score bars */}
+      <div style={{ padding: '22px 32px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ fontSize: '10px', letterSpacing: '2px', color: 'rgba(255,255,255,0.25)', marginBottom: '14px', fontFamily: 'sans-serif', textTransform: 'uppercase' }}>
+          Emotional Snapshot
+        </div>
+        {bars.map((b) => (
+          <div key={b.label} style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
+            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', width: '140px', fontFamily: 'sans-serif', flexShrink: 0 }}>{b.label}</div>
+            <div style={{ flex: 1, height: '5px', background: 'rgba(255,255,255,0.07)', borderRadius: '10px', overflow: 'hidden' }}>
+              <div style={{ width: `${b.value}%`, height: '100%', background: b.color, borderRadius: '10px' }} />
+            </div>
+            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', width: '26px', textAlign: 'right', fontFamily: 'sans-serif' }}>{b.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Green + Red flags */}
+      <div style={{ padding: '20px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        {analysis.green_flags.length > 0 && (
+          <div style={{ background: 'rgba(80,200,120,0.08)', border: '1px solid rgba(80,200,120,0.15)', borderRadius: '12px', padding: '14px' }}>
+            <div style={{ fontSize: '10px', letterSpacing: '2px', color: 'rgba(80,200,120,0.8)', marginBottom: '8px', fontFamily: 'sans-serif', textTransform: 'uppercase' }}>✓ Green Flags</div>
+            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, fontFamily: 'sans-serif' }}>
+              {analysis.green_flags.slice(0, 2).map((f, i) => <div key={i}>• {f}</div>)}
+            </div>
+          </div>
+        )}
+        {analysis.red_flags.length > 0 && (
+          <div style={{ background: 'rgba(255,80,80,0.07)', border: '1px solid rgba(255,80,80,0.12)', borderRadius: '12px', padding: '14px' }}>
+            <div style={{ fontSize: '10px', letterSpacing: '2px', color: 'rgba(255,100,100,0.8)', marginBottom: '8px', fontFamily: 'sans-serif', textTransform: 'uppercase' }}>⚠ Red Flags</div>
+            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, fontFamily: 'sans-serif' }}>
+              {analysis.red_flags.slice(0, 2).map((f, i) => <div key={i}>• {f}</div>)}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* CTA footer */}
+      <div style={{ padding: '20px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ fontFamily: 'sans-serif' }}>
+          <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', marginBottom: '2px', fontWeight: 600 }}>Curious about your match?</div>
+          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)' }}>Decode any profile free at relatify.in</div>
+        </div>
+        <div style={{ background: 'linear-gradient(135deg, #d050b0, #8060e0)', color: 'white', fontSize: '12px', fontWeight: 600, padding: '10px 18px', borderRadius: '10px', fontFamily: 'sans-serif' }}>
+          Try Relatify →
+        </div>
+      </div>
+    </div>
+  );
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 function App() {
   const [profileText, setProfileText] = useState('');
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
@@ -136,6 +213,7 @@ function App() {
   const [error, setError] = useState('');
   const [feedbackRating, setFeedbackRating] = useState<'accurate' | 'somewhat' | 'inaccurate' | ''>('');
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const heroRef = useRef<HTMLDivElement>(null);
   const howRef = useRef<HTMLDivElement>(null);
@@ -143,6 +221,7 @@ function App() {
   const aboutRef = useRef<HTMLDivElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const shareCardRef = useRef<HTMLDivElement>(null); // ← NEW
 
   const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
     ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -161,36 +240,22 @@ function App() {
       setError('Please enter at least 10 characters to analyze.');
       return;
     }
-
     setIsAnalyzing(true);
     setError('');
     setAnalysis(null);
     setFeedbackSubmitted(false);
     setFeedbackRating('');
-
     try {
-      const response = await fetch(
-        "https://relatify.gangwaljash17.workers.dev/analyze",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            profile: profileText,
-          }),
-        }
-      );
-
+      const response = await fetch('https://relatify.gangwaljash17.workers.dev/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profile: profileText }),
+      });
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Analysis failed');
       }
-
       const raw = await response.json();
-      
-      console.log("Raw API response:", raw);
-
       const result: AnalysisResult = {
         snapshot: {
           emotional_maturity: raw.snapshot?.emotional_maturity ?? 0,
@@ -217,10 +282,7 @@ function App() {
         message_examples: raw.message_examples ?? [],
         final_advice: raw.final_advice ?? '',
       };
-
-      console.log("Mapped result:", result);
       setAnalysis(result);
-      
       setTimeout(() => {
         resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
@@ -245,16 +307,10 @@ function App() {
 
   const handleSubmitFeedback = async () => {
     if (!feedbackRating) return;
-
     try {
       const { error: submitError } = await supabase
         .from('profile_feedback')
-        .insert({
-          profile_text: profileText,
-          accuracy_rating: feedbackRating,
-          comment: '',
-        });
-
+        .insert({ profile_text: profileText, accuracy_rating: feedbackRating, comment: '' });
       if (submitError) throw submitError;
       setFeedbackSubmitted(true);
     } catch (err) {
@@ -262,27 +318,41 @@ function App() {
     }
   };
 
+  // ── Download share card ───────────────────────────────────────────────────
+  const handleDownloadShareCard = async () => {
+    if (!shareCardRef.current) return;
+    setIsDownloading(true);
+    try {
+      const canvas = await html2canvas(shareCardRef.current, {
+        backgroundColor: '#141416',
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      });
+      const link = document.createElement('a');
+      link.download = 'relatify-analysis.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (err) {
+      console.error('Download failed:', err);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+  // ─────────────────────────────────────────────────────────────────────────
+
   return (
     <div className="min-h-screen bg-white">
       <nav className="sticky top-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-200 z-50">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <button
-            onClick={() => scrollToSection(heroRef)}
-            className="hover:opacity-80 transition-opacity"
-          >
+          <button onClick={() => scrollToSection(heroRef)} className="hover:opacity-80 transition-opacity">
             <Logo />
           </button>
           <div className="flex items-center gap-6">
-            <button
-              onClick={() => scrollToSection(howRef)}
-              className="text-sm font-medium text-gray-700 hover:text-pink-600 transition-colors"
-            >
+            <button onClick={() => scrollToSection(howRef)} className="text-sm font-medium text-gray-700 hover:text-pink-600 transition-colors">
               How Relatify Works
             </button>
-            <button
-              onClick={() => scrollToSection(aboutRef)}
-              className="text-sm font-medium text-gray-700 hover:text-pink-600 transition-colors"
-            >
+            <button onClick={() => scrollToSection(aboutRef)} className="text-sm font-medium text-gray-700 hover:text-pink-600 transition-colors">
               About
             </button>
           </div>
@@ -292,7 +362,6 @@ function App() {
       <div ref={heroRef} className="relative overflow-hidden pt-20 pb-24 bg-gradient-to-br from-gray-50 via-white to-pink-50">
         <BackgroundBlob className="top-10 right-1/4 w-96 h-96 bg-gradient-to-br from-pink-300 to-purple-300" />
         <BackgroundBlob className="bottom-0 left-0 w-80 h-80 bg-gradient-to-br from-purple-300 to-pink-200" />
-
         <div className="relative max-w-7xl mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
@@ -304,7 +373,6 @@ function App() {
                   Get clarity on emotional tone, maturity, ghosting patterns, and connection potential. Early-stage tool built to explore emotional patterns.
                 </p>
               </div>
-
               <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 space-y-4">
                 <label className="block text-sm font-semibold text-gray-900 uppercase tracking-wide">
                   Paste a dating profile
@@ -316,13 +384,9 @@ function App() {
                   placeholder="Example: I'm creative and love coffee. Looking for someone genuine and emotionally available..."
                   className="w-full h-32 p-4 border-2 border-gray-200 rounded-xl focus:border-pink-400 focus:ring-4 focus:ring-pink-100 outline-none transition-all resize-none text-gray-700 placeholder-gray-400"
                 />
-
                 {error && (
-                  <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-700 text-sm">
-                    {error}
-                  </div>
+                  <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-700 text-sm">{error}</div>
                 )}
-
                 <div className="flex gap-3 pt-2">
                   <button
                     onClick={handleAnalyze}
@@ -346,7 +410,6 @@ function App() {
                 </div>
               </div>
             </div>
-
             <div className="hidden lg:flex justify-center items-center">
               <FloatingCardStack />
             </div>
@@ -379,15 +442,11 @@ function App() {
                       <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                         <div
                           className={`h-full bg-gradient-to-r ${
-                            metric.color === 'pink'
-                              ? 'from-pink-500 to-pink-600'
-                              : metric.color === 'purple'
-                              ? 'from-purple-500 to-purple-600'
-                              : metric.color === 'rose'
-                              ? 'from-rose-500 to-rose-600'
-                              : metric.color === 'amber'
-                              ? 'from-amber-500 to-amber-600'
-                              : 'from-emerald-500 to-emerald-600'
+                            metric.color === 'pink' ? 'from-pink-500 to-pink-600'
+                            : metric.color === 'purple' ? 'from-purple-500 to-purple-600'
+                            : metric.color === 'rose' ? 'from-rose-500 to-rose-600'
+                            : metric.color === 'amber' ? 'from-amber-500 to-amber-600'
+                            : 'from-emerald-500 to-emerald-600'
                           }`}
                           style={{ width: `${metric.value}%` }}
                         ></div>
@@ -416,9 +475,7 @@ function App() {
                   <h3 className="text-lg font-bold text-gray-950 mb-4">Who They Really Are</h3>
                   <div className="space-y-4">
                     {analysis.who_they_really_are.map((paragraph, idx) => (
-                      <p key={idx} className="text-gray-700 leading-relaxed">
-                        {paragraph}
-                      </p>
+                      <p key={idx} className="text-gray-700 leading-relaxed">{paragraph}</p>
                     ))}
                   </div>
                 </div>
@@ -428,9 +485,7 @@ function App() {
               {analysis.what_they_want && (
                 <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-200 shadow-lg p-8 hover:shadow-xl transition-shadow">
                   <h3 className="text-lg font-bold text-gray-950 mb-4">What They Want</h3>
-                  <div className="text-gray-700 leading-relaxed whitespace-pre-line">
-                    {analysis.what_they_want}
-                  </div>
+                  <div className="text-gray-700 leading-relaxed whitespace-pre-line">{analysis.what_they_want}</div>
                 </div>
               )}
 
@@ -551,6 +606,31 @@ function App() {
                   <p className="text-gray-700 leading-relaxed">{analysis.final_advice}</p>
                 </div>
               )}
+
+              {/* ── Hidden share card + Download button ── */}
+              <ShareCard analysis={analysis} shareRef={shareCardRef} />
+
+              <button
+                onClick={handleDownloadShareCard}
+                disabled={isDownloading}
+                className="w-full flex items-center justify-center gap-2 bg-gray-950 text-white px-6 py-3 rounded-xl font-semibold hover:bg-gray-800 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isDownloading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="animate-spin">↻</span> Generating...
+                  </span>
+                ) : (
+                  <>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="7 10 12 15 17 10"/>
+                      <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Download & Share This Analysis
+                  </>
+                )}
+              </button>
+              {/* ────────────────────────────────────────── */}
             </div>
 
             <div className="mt-12 space-y-6">
@@ -564,10 +644,8 @@ function App() {
                         onClick={() => setFeedbackRating(rating)}
                         className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-all text-sm active:scale-95 ${
                           feedbackRating === rating
-                            ? rating === 'accurate'
-                              ? 'bg-emerald-500 text-white'
-                              : rating === 'somewhat'
-                              ? 'bg-amber-500 text-white'
+                            ? rating === 'accurate' ? 'bg-emerald-500 text-white'
+                              : rating === 'somewhat' ? 'bg-amber-500 text-white'
                               : 'bg-rose-500 text-white'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
@@ -607,7 +685,6 @@ function App() {
       <div ref={howRef} className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-6">
           <h2 className="text-4xl font-bold text-gray-950 mb-16 text-center">How Relatify Works</h2>
-
           <div className="space-y-8">
             {[
               { num: 1, title: 'Paste the Profile', desc: 'Copy any dating profile text from any app.' },
@@ -633,7 +710,6 @@ function App() {
       <div ref={insightsRef} className="py-20 bg-gradient-to-br from-gray-50 to-white">
         <div className="max-w-4xl mx-auto px-6">
           <h2 className="text-4xl font-bold text-gray-950 mb-16 text-center">What Insights You Get</h2>
-
           <div className="grid md:grid-cols-2 gap-8">
             {[
               { icon: Brain, color: 'pink', title: 'Emotional Maturity', desc: 'Self-awareness, communication style, and emotional expression.' },
@@ -665,7 +741,6 @@ function App() {
       <div className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-6">
           <h2 className="text-4xl font-bold text-gray-950 mb-12 text-center">Who It's For</h2>
-
           <div className="grid md:grid-cols-3 gap-6">
             {[
               { title: 'People tired of guessing', desc: 'Get clarity before investing feelings or time.' },
@@ -683,17 +758,13 @@ function App() {
 
       <div ref={aboutRef} className="py-24 bg-gradient-to-br from-pink-50 via-white to-purple-50 relative overflow-hidden">
         <BackgroundBlob className="top-20 right-10 w-80 h-80 bg-gradient-to-br from-pink-300 to-purple-300" />
-
         <div className="relative max-w-3xl mx-auto px-6 text-center">
           <Zap className="w-12 h-12 text-pink-600 mx-auto mb-6" />
           <h2 className="text-4xl font-bold text-gray-950 mb-6">Built to Help You Understand</h2>
           <p className="text-lg text-gray-700 mb-8 leading-relaxed">
             Relatify is an <span className="font-semibold">early-stage tool</span> built to explore emotional patterns in dating profiles. We're not here to judge anyone — just to help you make clearer decisions based on communication style and expressed values.
           </p>
-          <p className="text-gray-600 mb-8">
-            Currently improving with real user feedback. Your insights make us smarter.
-          </p>
-
+          <p className="text-gray-600 mb-8">Currently improving with real user feedback. Your insights make us smarter.</p>
           <div className="flex items-center justify-center gap-8 flex-wrap">
             <div className="flex items-center gap-2">
               <Shield className="w-5 h-5 text-emerald-600" />
@@ -727,12 +798,8 @@ function App() {
           from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.6s ease-out;
-        }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        .animate-fadeIn { animation: fadeIn 0.6s ease-out; }
       `}</style>
     </div>
   );
