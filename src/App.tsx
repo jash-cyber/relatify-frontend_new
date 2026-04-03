@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { Heart, Shield, Brain, MessageCircle, Zap, Check } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
 import html2canvas from 'html2canvas';
+import ChatAnalysis from './ChatAnalysis';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
@@ -117,7 +118,6 @@ function BackgroundBlob({ className }: { className: string }) {
   return <div className={`absolute rounded-full opacity-15 blur-3xl ${className}`}></div>;
 }
 
-// ── Share Card (renders off-screen, captured by html2canvas) ──────────────────
 function ShareCard({ analysis, shareRef }: { analysis: AnalysisResult; shareRef: React.RefObject<HTMLDivElement> }) {
   const snap = analysis.snapshot;
   const bars = [
@@ -143,19 +143,16 @@ function ShareCard({ analysis, shareRef }: { analysis: AnalysisResult; shareRef:
         top: 0,
       }}
     >
-      {/* Header */}
       <div style={{ padding: '28px 32px 22px', background: 'linear-gradient(135deg, #1a0a2e 0%, #16091f 50%, #0d1a2e 100%)' }}>
         <div style={{ fontSize: '11px', letterSpacing: '3px', color: 'rgba(255,255,255,0.35)', marginBottom: '14px', fontFamily: 'sans-serif', textTransform: 'uppercase' }}>
           Relatify · Profile Analysis
         </div>
         {snap.one_line_reality_check && (
-          <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, borderLeft: '2px solid rgba(220,80,180,0.5)', paddingLeft: '12px', marginBottom: '0px', fontStyle: 'italic' }}>
+          <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, borderLeft: '2px solid rgba(220,80,180,0.5)', paddingLeft: '12px', fontStyle: 'italic' }}>
             "{snap.one_line_reality_check}"
           </div>
         )}
       </div>
-
-      {/* Score bars */}
       <div style={{ padding: '22px 32px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
         <div style={{ fontSize: '10px', letterSpacing: '2px', color: 'rgba(255,255,255,0.25)', marginBottom: '14px', fontFamily: 'sans-serif', textTransform: 'uppercase' }}>
           Emotional Snapshot
@@ -170,8 +167,6 @@ function ShareCard({ analysis, shareRef }: { analysis: AnalysisResult; shareRef:
           </div>
         ))}
       </div>
-
-      {/* Green + Red flags */}
       <div style={{ padding: '20px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
         {analysis.green_flags.length > 0 && (
           <div style={{ background: 'rgba(80,200,120,0.08)', border: '1px solid rgba(80,200,120,0.15)', borderRadius: '12px', padding: '14px' }}>
@@ -190,8 +185,6 @@ function ShareCard({ analysis, shareRef }: { analysis: AnalysisResult; shareRef:
           </div>
         )}
       </div>
-
-      {/* CTA footer */}
       <div style={{ padding: '20px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ fontFamily: 'sans-serif' }}>
           <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', marginBottom: '2px', fontWeight: 600 }}>Curious about your match?</div>
@@ -204,9 +197,9 @@ function ShareCard({ analysis, shareRef }: { analysis: AnalysisResult; shareRef:
     </div>
   );
 }
-// ─────────────────────────────────────────────────────────────────────────────
 
 function App() {
+  const [page, setPage] = useState<'home' | 'chat'>('home');
   const [profileText, setProfileText] = useState('');
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -221,7 +214,12 @@ function App() {
   const aboutRef = useRef<HTMLDivElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const shareCardRef = useRef<HTMLDivElement>(null); // ← NEW
+  const shareCardRef = useRef<HTMLDivElement>(null);
+
+  // ── If on chat page, render ChatAnalysis ──
+  if (page === 'chat') {
+    return <ChatAnalysis onHome={() => setPage('home')} />;
+  }
 
   const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
     ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -318,7 +316,6 @@ function App() {
     }
   };
 
-  // ── Download share card ───────────────────────────────────────────────────
   const handleDownloadShareCard = async () => {
     if (!shareCardRef.current) return;
     setIsDownloading(true);
@@ -339,7 +336,6 @@ function App() {
       setIsDownloading(false);
     }
   };
-  // ─────────────────────────────────────────────────────────────────────────
 
   return (
     <div className="min-h-screen bg-white">
@@ -348,12 +344,19 @@ function App() {
           <button onClick={() => scrollToSection(heroRef)} className="hover:opacity-80 transition-opacity">
             <Logo />
           </button>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3">
             <button onClick={() => scrollToSection(howRef)} className="text-sm font-medium text-gray-700 hover:text-pink-600 transition-colors">
               How Relatify Works
             </button>
             <button onClick={() => scrollToSection(aboutRef)} className="text-sm font-medium text-gray-700 hover:text-pink-600 transition-colors">
               About
+            </button>
+            {/* ── Chat Analyzer CTA ── */}
+            <button
+              onClick={() => setPage('chat')}
+              className="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:shadow-lg transition-all active:scale-95"
+            >
+              Chat Analyzer ✨
             </button>
           </div>
         </div>
@@ -373,6 +376,19 @@ function App() {
                   Get clarity on emotional tone, maturity, ghosting patterns, and connection potential. Early-stage tool built to explore emotional patterns.
                 </p>
               </div>
+
+              {/* ── Chat Analyzer Banner ── */}
+              <div
+                onClick={() => setPage('chat')}
+                className="cursor-pointer bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-2xl p-4 flex items-center justify-between hover:shadow-md transition-all group"
+              >
+                <div>
+                  <div className="text-sm font-bold text-purple-700">✨ New: Chat Analyzer</div>
+                  <div className="text-xs text-gray-500 mt-0.5">Upload a screenshot or paste your texts — find out if they're into you</div>
+                </div>
+                <span className="text-purple-500 font-bold text-lg group-hover:translate-x-1 transition-transform">→</span>
+              </div>
+
               <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 space-y-4">
                 <label className="block text-sm font-semibold text-gray-900 uppercase tracking-wide">
                   Paste a dating profile
@@ -421,9 +437,7 @@ function App() {
         <div ref={resultsRef} className="py-16 bg-gradient-to-b from-gray-50 to-white">
           <div className="max-w-3xl mx-auto px-6">
             <h2 className="text-4xl font-bold text-gray-950 mb-12">Your Analysis</h2>
-
             <div className="space-y-6 animate-fadeIn">
-              {/* Emotional Snapshot */}
               <div className="bg-white rounded-2xl border border-pink-200 shadow-lg p-8 hover:shadow-xl transition-shadow">
                 <h3 className="text-lg font-bold text-gray-950 mb-6">Emotional Snapshot</h3>
                 <div className="space-y-4">
@@ -461,7 +475,6 @@ function App() {
                 )}
               </div>
 
-              {/* The Vibe */}
               {analysis.vibe_summary && (
                 <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border border-purple-200 shadow-lg p-8 hover:shadow-xl transition-shadow">
                   <h3 className="text-lg font-bold text-gray-950 mb-4">The Vibe</h3>
@@ -469,7 +482,6 @@ function App() {
                 </div>
               )}
 
-              {/* Who They Really Are */}
               {analysis.who_they_really_are && analysis.who_they_really_are.length > 0 && (
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 shadow-lg p-8 hover:shadow-xl transition-shadow">
                   <h3 className="text-lg font-bold text-gray-950 mb-4">Who They Really Are</h3>
@@ -481,7 +493,6 @@ function App() {
                 </div>
               )}
 
-              {/* What They Want */}
               {analysis.what_they_want && (
                 <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-200 shadow-lg p-8 hover:shadow-xl transition-shadow">
                   <h3 className="text-lg font-bold text-gray-950 mb-4">What They Want</h3>
@@ -489,7 +500,6 @@ function App() {
                 </div>
               )}
 
-              {/* Green Flags */}
               {analysis.green_flags && analysis.green_flags.length > 0 && (
                 <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border border-emerald-200 shadow-lg p-8 hover:shadow-xl transition-shadow">
                   <h3 className="text-lg font-bold text-gray-950 mb-4 flex items-center gap-2">
@@ -506,7 +516,6 @@ function App() {
                 </div>
               )}
 
-              {/* Red Flags */}
               {analysis.red_flags && analysis.red_flags.length > 0 && (
                 <div className="bg-gradient-to-r from-rose-50 to-red-50 rounded-2xl border border-rose-200 shadow-lg p-8 hover:shadow-xl transition-shadow">
                   <h3 className="text-lg font-bold text-gray-950 mb-4 flex items-center gap-2">
@@ -523,7 +532,6 @@ function App() {
                 </div>
               )}
 
-              {/* Blunt Reality Check */}
               {analysis.blunt_truths && analysis.blunt_truths.length > 0 && (
                 <div className="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-2xl border border-amber-300 shadow-lg p-8 hover:shadow-xl transition-shadow">
                   <h3 className="text-lg font-bold text-gray-950 mb-4">Blunt Reality Check</h3>
@@ -538,7 +546,6 @@ function App() {
                 </div>
               )}
 
-              {/* How to Talk to Them */}
               {analysis.how_to_talk && (
                 <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl border border-cyan-200 shadow-lg p-8 hover:shadow-xl transition-shadow">
                   <h3 className="text-lg font-bold text-gray-950 mb-4">How to Talk to Them</h3>
@@ -546,7 +553,6 @@ function App() {
                 </div>
               )}
 
-              {/* Texting Style */}
               <div className="bg-gradient-to-r from-violet-50 to-purple-50 rounded-2xl border border-violet-200 shadow-lg p-8 hover:shadow-xl transition-shadow">
                 <h3 className="text-lg font-bold text-gray-950 mb-4">Texting Style</h3>
                 <div className="space-y-3">
@@ -577,7 +583,6 @@ function App() {
                 </div>
               </div>
 
-              {/* First Date Energy */}
               {analysis.first_date_energy && (
                 <div className="bg-gradient-to-r from-fuchsia-50 to-pink-50 rounded-2xl border border-fuchsia-200 shadow-lg p-8 hover:shadow-xl transition-shadow">
                   <h3 className="text-lg font-bold text-gray-950 mb-4">First Date Energy</h3>
@@ -585,7 +590,6 @@ function App() {
                 </div>
               )}
 
-              {/* Message Examples */}
               {analysis.message_examples && analysis.message_examples.length > 0 && (
                 <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-2xl border border-teal-200 shadow-lg p-8 hover:shadow-xl transition-shadow">
                   <h3 className="text-lg font-bold text-gray-950 mb-4">Message Examples</h3>
@@ -599,7 +603,6 @@ function App() {
                 </div>
               )}
 
-              {/* Final Advice */}
               {analysis.final_advice && (
                 <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border border-purple-200 shadow-lg p-8">
                   <h3 className="font-bold text-gray-950 mb-4">FINAL ADVICE</h3>
@@ -607,7 +610,6 @@ function App() {
                 </div>
               )}
 
-              {/* ── Hidden share card + Download button ── */}
               <ShareCard analysis={analysis} shareRef={shareCardRef} />
 
               <button
@@ -616,9 +618,7 @@ function App() {
                 className="w-full flex items-center justify-center gap-2 bg-gray-950 text-white px-6 py-3 rounded-xl font-semibold hover:bg-gray-800 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isDownloading ? (
-                  <span className="flex items-center gap-2">
-                    <span className="animate-spin">↻</span> Generating...
-                  </span>
+                  <span className="flex items-center gap-2"><span className="animate-spin">↻</span> Generating...</span>
                 ) : (
                   <>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -630,7 +630,6 @@ function App() {
                   </>
                 )}
               </button>
-              {/* ────────────────────────────────────────── */}
             </div>
 
             <div className="mt-12 space-y-6">
@@ -789,7 +788,7 @@ function App() {
         </div>
       </footer>
 
-      <style jsx>{`
+      <style>{`
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-20px); }
